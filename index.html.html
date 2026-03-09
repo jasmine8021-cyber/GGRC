@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>경기농촌재생지원센터 운영 대시보드</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background: #f2f5f2; font-size: 14px; }
+header { background: linear-gradient(135deg, #1a3a1a, #2d5a27); padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; }
+header .title-sub { color: #a5d6a7; font-size: 10px; letter-spacing: 2px; font-weight: 600; margin-bottom: 3px; }
+header .title-main { color: #fff; font-size: 17px; font-weight: 700; }
+.tabs { display: flex; gap: 5px; }
+.tabs button { padding: 6px 12px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; font-size: 11px; font-family: inherit; background: rgba(255,255,255,0.12); color: #c8e6c9; }
+.tabs button.active { background: #4caf50; color: #fff; }
+.wrap { padding: 14px 20px; }
+.kpi { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 12px; }
+.kpi-card { background: #fff; border-radius: 9px; padding: 11px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.kpi-card .kl { font-size: 10px; color: #888; }
+.kpi-card .kv { font-size: 17px; font-weight: 700; color: #1a3a1a; margin: 2px 0; }
+.kpi-card .ks { font-size: 10px; color: #bbb; }
+.areas { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-bottom: 12px; }
+.area-card { background: #fff; border-radius: 10px; padding: 12px; cursor: pointer; border: 2px solid #e8ede8; transition: all 0.15s; }
+.area-card.active { color: #fff; }
+.area-icon { font-size: 20px; }
+.area-badge { font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px; }
+.area-name { font-size: 12px; font-weight: 700; margin: 6px 0 8px; }
+.area-footer { display: flex; justify-content: space-between; padding-top: 6px; border-top: 1px solid #eee; }
+.area-footer.active-footer { border-top-color: rgba(255,255,255,0.15); }
+.area-stat-label { font-size: 9px; color: #999; }
+.area-stat-val { font-size: 11px; font-weight: 700; color: #1a3a1a; }
+.panel { background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.panel-title { font-size: 12px; font-weight: 700; color: #1a3a1a; margin-bottom: 10px; }
+.bar-row { margin-bottom: 9px; }
+.bar-row .br-top { display: flex; justify-content: space-between; margin-bottom: 2px; font-size: 11px; }
+.bar-bg { height: 6px; border-radius: 3px; background: #f0f0f0; }
+.bar-fill { height: 100%; border-radius: 3px; }
+.indirect-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f5f5f5; }
+.indirect-row .il { font-size: 11px; }
+.indirect-row .in { font-size: 10px; color: #bbb; }
+.indirect-row .iv { font-size: 11px; font-weight: 700; color: #1a3a1a; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+/* schedule */
+.sch-grid { display: grid; grid-template-columns: 160px repeat(12,1fr); gap: 2px; align-items: center; margin-bottom: 1px; }
+.sch-label { font-size: 10px; font-weight: 700; }
+.sch-sub-label { font-size: 9px; color: #666; padding-left: 10px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.sch-month { font-size: 9px; color: #777; text-align: center; font-weight: 600; }
+.sch-bar { height: 4px; border-radius: 2px; }
+.sch-sub-bar { height: 11px; border-radius: 2px; }
+/* project list */
+.proj-list { display: grid; gap: 6px; }
+.proj-card { border: 1.5px solid #e8ede8; border-radius: 9px; padding: 10px 12px; cursor: pointer; background: #fafafa; transition: all 0.15s; }
+.proj-card:hover { border-color: #aaa; }
+.proj-top { display: flex; justify-content: space-between; align-items: center; }
+.proj-id { font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; }
+.proj-name { font-size: 11px; font-weight: 600; }
+.proj-sch { font-size: 9px; color: #888; margin-top: 3px; }
+.proj-status { font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 8px; }
+.proj-budget { font-size: 10px; font-weight: 700; color: #1a3a1a; margin-top: 2px; }
+.detail-panel { background: #fff; border-radius: 10px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+.detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.detail-title { font-size: 12px; font-weight: 700; line-height: 1.6; margin-bottom: 10px; }
+.detail-kpi { display: flex; justify-content: space-between; background: #f8f9f8; border-radius: 7px; padding: 8px 10px; margin-bottom: 10px; }
+.detail-kpi .dk-label { font-size: 9px; color: #aaa; }
+.detail-kpi .dk-val { font-size: 15px; font-weight: 700; margin-top: 1px; }
+.detail-row { margin-bottom: 7px; }
+.detail-row .dr-label { font-size: 9px; font-weight: 700; color: #999; margin-bottom: 1px; }
+.detail-row .dr-val { font-size: 10px; color: #333; line-height: 1.7; background: #fafafa; padding: 6px 9px; border-radius: 5px; }
+.list-detail-grid { display: grid; grid-template-columns: 1fr 320px; gap: 10px; }
+.note { margin-top: 10px; padding: 9px 11px; background: #f4f6f4; border-radius: 7px; font-size: 10px; color: #666; line-height: 1.6; }
+.close-btn { background: none; border: none; cursor: pointer; font-size: 15px; color: #ccc; }
+.all-btn { font-size: 10px; color: #888; background: #f5f5f5; border: none; border-radius: 5px; padding: 3px 8px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="title-sub">경기농촌재생지원센터 · 2026</div>
+    <div class="title-main">농촌공간광역지원기관 운영 대시보드</div>
+  </div>
+  <div class="tabs">
+    <button class="active" onclick="showTab('overview',this)">📊 개요</button>
+    <button onclick="showTab('schedule',this)">📅 일정</button>
+    <button onclick="showTab('detail',this)">📋 목록</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="kpi">
+    <div class="kpi-card"><div class="kl">총 사업비</div><div class="kv">396,000천원</div><div class="ks">국비 50% + 도비 50%</div></div>
+    <div class="kpi-card"><div class="kl">직접비</div><div class="kv">207,000천원</div><div class="ks">총 사업비의 52.3%</div></div>
+    <div class="kpi-card"><div class="kl">하위사업 수</div><div class="kv">14개</div><div class="ks">4개 사업영역</div></div>
+    <div class="kpi-card"><div class="kl">지원 대상</div><div class="kv">15개 시·군</div><div class="ks">경기도 내 전체</div></div>
+  </div>
+
+  <div class="areas" id="areas"></div>
+
+  <div id="tab-overview">
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-title">직접비 영역별 배분 (207,000천원)</div>
+        <div class="bar-row"><div class="br-top"><span>📚 전문역량 강화</span><span style="color:#1a472a;font-weight:700">10,000천원</span></div><div class="bar-bg"><div class="bar-fill" style="width:4.8%;background:#4caf50"></div></div></div>
+        <div class="bar-row"><div class="br-top"><span>🌾 현장기반 구축</span><span style="color:#1b5e20;font-weight:700">65,000천원</span></div><div class="bar-bg"><div class="bar-fill" style="width:31.4%;background:#8bc34a"></div></div></div>
+        <div class="bar-row"><div class="br-top"><span>📋 수립·이행 고도화</span><span style="color:#004d40;font-weight:700">19,500천원</span></div><div class="bar-bg"><div class="bar-fill" style="width:9.4%;background:#26a69a"></div></div></div>
+        <div class="bar-row"><div class="br-top"><span>🔬 연구·정책확산</span><span style="color:#33691e;font-weight:700">112,500천원</span></div><div class="bar-bg"><div class="bar-fill" style="width:54.3%;background:#afb42b"></div></div></div>
+        <div class="note">📌 추진근거: 농촌공간재구조화 및 재생지원에 관한 법 제35조 · 2026년 농촌공간계획 수립체계 지원사업 지침</div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">간접비 항목별 내역 (189,000천원)</div>
+        <div class="indirect-row"><div><div class="il">인건비 (6급 1인+7급 1인)</div><div class="in">기본연봉·수당·퇴직급여</div></div><div class="iv">149,500천원</div></div>
+        <div class="indirect-row"><div><div class="il">여비교통비</div><div class="in">월 750천원×12개월</div></div><div class="iv">9,000천원</div></div>
+        <div class="indirect-row"><div><div class="il">PC·차량 임차료</div><div class="in">PC 385천원×12+차량 800천원×9</div></div><div class="iv">12,720천원</div></div>
+        <div class="indirect-row"><div><div class="il">4대보험 기관부담금</div><div class="in">국민·건강·고용·산재</div></div><div class="iv">9,870천원</div></div>
+        <div class="indirect-row"><div><div class="il">직원후생·기타경비</div><div class="in">복지·보건·사무용품 등</div></div><div class="iv">8,060천원</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-schedule" style="display:none">
+    <div class="panel">
+      <div class="panel-title">분기별 추진 일정 (운영계획서 기준)</div>
+      <div class="sch-grid" style="margin-bottom:6px">
+        <div></div>
+        <div class="sch-month">1월</div><div class="sch-month">2월</div><div class="sch-month">3월</div>
+        <div class="sch-month">4월</div><div class="sch-month">5월</div><div class="sch-month">6월</div>
+        <div class="sch-month">7월</div><div class="sch-month">8월</div><div class="sch-month">9월</div>
+        <div class="sch-month">10월</div><div class="sch-month">11월</div><div class="sch-month">12월</div>
+      </div>
+      <div id="sch-rows"></div>
+    </div>
+  </div>
+
+  <div id="tab-detail" style="display:none">
+    <div id="detail-wrap"></div>
+  </div>
+</div>
+
+<script>
+const AREAS = [
+  {id:"A",name:"전문역량 강화",budget:10000,color:"#1a472a",accent:"#4caf50",light:"#e8f5e9",icon:"📚",
+   projects:[
+    {id:"A-1",name:"정책교육 (지자체·전문기관)",target:"15개 시군 행정·중간지원조직 60명",output:"운영결과보고서",budget:3550,months:[3,4,5,6,7,8,9,10,11],schedule:"3~11월 / 집합교육 2회",details:"당일형 집합교육 2회 / 강의+워크샵 혼합",status:"진행전"},
+    {id:"A-2",name:"접경지 워크샵",target:"경기·강원 접경지 13개 지역",output:"운영결과보고서",budget:975,months:[5,6,7],schedule:"5~7월 중 1회",details:"당일형 워크샵 1회 / 퍼실리테이션 사업발굴",status:"진행전"},
+    {id:"A-3",name:"찾아가는 설명회",target:"15개 시군 행정·마을리더·지역협의체 등",output:"운영결과보고서",budget:1350,months:[1,2,3,4,5,6,7,8,9,10,11,12],schedule:"연 5회 이상 (매월)",details:"매월 신청접수 → 일정수립 → 현장설명",status:"진행중"},
+    {id:"A-4",name:"기초정책심의위원회 지원",target:"기본계획 수립 진행 시군 심의위원회",output:"운영결과보고서",budget:900,months:[4,5,6,7,8,9],schedule:"권역별 집합교육 총 2회",details:"권역별 1회씩 총 2회 / 강의+사례 중심",status:"진행전"},
+    {id:"A-5",name:"기초지원기관 교육",target:"기초지원기관·예비 기초지원기관·중간지원조직",output:"운영결과보고서",budget:3225,months:[3,4,5,6,7,8,9,10],schedule:"집합교육 2회",details:"매뉴얼 배포 + 집합교육 2회",status:"진행전"},
+  ]},
+  {id:"B",name:"현장기반 구축",budget:65000,color:"#1b5e20",accent:"#8bc34a",light:"#f1f8e9",icon:"🌾",
+   projects:[
+    {id:"B-1",name:"농촌재생 사례발굴 과정",target:"2025년 현장전문가 심화교육 수료자 20명 내외",output:"운영결과보고서, 농촌재생사례집",budget:13000,months:[4,5,6,7,8,9],schedule:"4~9월 / 총 6주",details:"이론교육 → 현장조사 실습 → 사례집 제작",status:"진행전"},
+    {id:"B-2",name:"현장전문가 실증과정",target:"2025년 경기 농촌재생 현장전문가 수료자 / 대상시군 1개",output:"운영결과보고서, 데이터보드 1식",budget:50000,months:[5,6,7,8,9,10],schedule:"5~10월 / 현장전문가 3~4인, 2개월",details:"교육 → 현장조사 → DB구축 → 성과공유 / 참여형 데이터 10종",status:"진행전"},
+    {id:"B-3",name:"연구 자문 및 모니터링",target:"전문가 3명 + 용역사 2명 + 도·광역지원기관 3명",output:"자문운영보고서",budget:2000,months:[5,6,7,8,9,10],schedule:"자문 2회",details:"자문회의 2회 (회당 8명 내외)",status:"진행전"},
+  ]},
+  {id:"C",name:"수립·이행 고도화",budget:19500,color:"#004d40",accent:"#26a69a",light:"#e0f2f1",icon:"📋",
+   projects:[
+    {id:"C-1",name:"기본·시행계획 및 협약 컨설팅",target:"농촌공간 재구조화·재생 기본·시행계획 및 농촌협약 추진 중 시·군",output:"자문운영보고서",budget:13500,months:[1,2,3,4,5,6,7,8,9,10,11,12],schedule:"연 12회 이상 (매월)",details:"수요조사(20~25일) → 신청접수 → 컨설팅 → 결과전달(15일)",status:"진행중"},
+    {id:"C-2",name:"지역협의체 운영",target:"5개 분과 전문가 20명 + 도·광역기관 5명",output:"운영결과보고서",budget:6000,months:[9,10,11],schedule:"연 1회 (하반기)",details:"5개 분야 분과 / 브리핑·분과토의·라운드테이블",status:"진행전"},
+  ]},
+  {id:"D",name:"연구·정책확산",budget:112500,color:"#33691e",accent:"#afb42b",light:"#f9fbe7",icon:"🔬",
+   projects:[
+    {id:"D-1",name:"주민참여 계획수립 지원",target:"농촌공간 개선이 필요한 마을 또는 읍·면 단위",output:"기본계획 보고서",budget:30000,months:[3,4,5,6,7,8,9,10,11],schedule:"3~11월",details:"대상지 선정 → 주민협의체 구성 → 현황조사 → 실행계획 수립 → 모니터링",status:"진행전"},
+    {id:"D-2",name:"기본계획 수립 지원",target:"기본계획 미수립 시군 2개 (김포·남양주)",output:"연구용역 보고서",budget:50000,months:[2,3,4,5,6,7,8,9,10,11,12],schedule:"2~12월 / 각 25,000천원×2개 시군",details:"현황분석·절차안내·실무컨설팅 / 김포·남양주",status:"진행중"},
+    {id:"D-3",name:"농촌다움 포럼",target:"도·시군 관계자·전문가·중간지원조직 등 150명",output:"운영결과보고서",budget:16250,months:[9,10],schedule:"하반기 1회",details:"주제발제·토론·사례발표·정책방향 제안",status:"진행전"},
+    {id:"D-4",name:"농촌재생 컨퍼런스",target:"도·시군 담당자·관계기관·참여주민 등 150명",output:"운영결과보고서",budget:16250,months:[11,12],schedule:"연말 1회",details:"주요성과 발표·우수사례 소개·향후 정책방향 제시",status:"진행전"},
+  ]},
+];
+
+const SS = {
+  "진행중":{bg:"#e3f2fd",text:"#1565c0"},
+  "진행전":{bg:"#fff8e1",text:"#e65100"},
+  "완료":{bg:"#e8f5e9",text:"#2e7d32"},
+};
+
+let selArea = null;
+let selProj = null;
+const total = AREAS.reduce((s,a)=>s+a.budget,0);
+
+function showTab(tab, btn) {
+  ['overview','schedule','detail'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = t===tab?'block':'none';
+  });
+  document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if(tab==='detail') renderDetail();
+  if(tab==='schedule') renderSchedule();
+}
+
+function renderAreas() {
+  const el = document.getElementById('areas');
+  el.innerHTML = AREAS.map((a,i) => {
+    const on = selArea===i;
+    return `<div class="area-card${on?' active':''}" 
+      style="background:${on?a.color:'#fff'};border-color:${on?a.accent:'#e8ede8'};${on?'box-shadow:0 4px 16px '+a.color+'44':''}"
+      onclick="clickArea(${i})">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:20px">${a.icon}</span>
+        <span class="area-badge" style="background:${on?'rgba(255,255,255,0.15)':a.light};color:${on?a.accent:a.color}">${a.projects.length}개</span>
+      </div>
+      <div class="area-name" style="color:${on?'#fff':'#1a1a1a'}">${a.name}</div>
+      <div class="area-footer ${on?'active-footer':''}" style="border-top-color:${on?'rgba(255,255,255,0.15)':'#eee'}">
+        <div><div class="area-stat-label" style="color:${on?a.accent:'#999'}">직접비</div><div class="area-stat-val" style="color:${on?'#fff':'#1a3a1a'}">${a.budget.toLocaleString()}천원</div></div>
+        <div style="text-align:right"><div class="area-stat-label" style="color:${on?a.accent:'#999'}">비중</div><div class="area-stat-val" style="color:${on?'#fff':'#1a3a1a'}">${Math.round(a.budget/total*100)}%</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function clickArea(i) {
+  selArea = selArea===i ? null : i;
+  selProj = null;
+  renderAreas();
+  // switch to detail tab
+  document.getElementById('tab-overview').style.display='none';
+  document.getElementById('tab-schedule').style.display='none';
+  document.getElementById('tab-detail').style.display='block';
+  document.querySelectorAll('.tabs button').forEach((b,bi)=>b.classList.toggle('active',bi===2));
+  renderDetail();
+}
+
+function renderSchedule() {
+  const el = document.getElementById('sch-rows');
+  el.innerHTML = AREAS.map(a => {
+    const arow = `<div class="sch-grid" style="margin-bottom:2px">
+      <div class="sch-label" style="color:${a.color}">${a.icon} ${a.name}</div>
+      ${[1,2,3,4,5,6,7,8,9,10,11,12].map(m=>`<div class="sch-bar" style="background:${a.projects.some(p=>p.months.includes(m))?a.color:'#eee'}"></div>`).join('')}
+    </div>`;
+    const prows = a.projects.map(p=>`<div class="sch-grid" style="margin-bottom:1px">
+      <div class="sch-sub-label">▸ ${p.name}</div>
+      ${[1,2,3,4,5,6,7,8,9,10,11,12].map(m=>`<div class="sch-sub-bar" style="background:${p.months.includes(m)?a.accent:'transparent'}"></div>`).join('')}
+    </div>`).join('');
+    return arow + prows + '<div style="height:4px"></div>';
+  }).join('');
+}
+
+function renderDetail() {
+  const SA = selArea!==null ? AREAS[selArea] : null;
+  const list = SA ? SA.projects.map(p=>({...p,area:SA})) : AREAS.flatMap(a=>a.projects.map(p=>({...p,area:a})));
+  const listHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;color:#1a3a1a">${SA?SA.icon+' '+SA.name:'전체 하위사업'} <span style="font-size:10px;color:#aaa;font-weight:400">${list.length}건</span></div>
+      ${SA?`<button class="all-btn" onclick="clearArea()">전체보기</button>`:''}
+    </div>
+    <div class="proj-list">
+      ${list.map(p=>{
+        const ss=SS[p.status];
+        const on=selProj===p.id;
+        return `<div class="proj-card" style="border-color:${on?p.area.color:'#e8ede8'};background:${on?p.area.light:'#fafafa'}" onclick="clickProj('${p.id}')">
+          <div class="proj-top">
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+                <span class="proj-id" style="background:${p.area.light};color:${p.area.color}">${p.id}</span>
+                <span class="proj-name">${p.name}</span>
+              </div>
+              <div class="proj-sch">📅 ${p.schedule}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;margin-left:6px">
+              <span class="proj-status" style="background:${ss.bg};color:${ss.text}">${p.status}</span>
+              <span class="proj-budget">${p.budget.toLocaleString()}천원</span>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+
+  let detailHTML = '';
+  if(selProj) {
+    const a = AREAS.find(a=>a.projects.some(p=>p.id===selProj));
+    const p = a.projects.find(p=>p.id===selProj);
+    const ss = SS[p.status];
+    detailHTML = `<div class="detail-panel">
+      <div class="detail-header">
+        <span class="proj-id" style="background:${a.light};color:${a.color};font-size:10px;padding:2px 7px;border-radius:4px">${p.id}</span>
+        <button class="close-btn" onclick="closeProj()">✕</button>
+      </div>
+      <div class="detail-title">${p.name}</div>
+      <div class="detail-kpi">
+        <div><div class="dk-label">소요예산</div><div class="dk-val" style="color:${a.color}">${p.budget.toLocaleString()}천원</div></div>
+        <div style="text-align:right"><div class="dk-label">상태</div><span class="proj-status" style="background:${ss.bg};color:${ss.text}">${p.status}</span></div>
+      </div>
+      <div class="detail-row"><div class="dr-label">📅 추진일정</div><div class="dr-val">${p.schedule}</div></div>
+      <div class="detail-row"><div class="dr-label">🎯 대상</div><div class="dr-val">${p.target}</div></div>
+      <div class="detail-row"><div class="dr-label">⚙️ 추진방법</div><div class="dr-val">${p.details}</div></div>
+      <div class="detail-row"><div class="dr-label">📄 성과품</div><div class="dr-val">${p.output}</div></div>
+    </div>`;
+  }
+
+  const wrap = document.getElementById('detail-wrap');
+  if(selProj) {
+    wrap.innerHTML = `<div class="list-detail-grid"><div class="panel">${listHTML}</div>${detailHTML}</div>`;
+  } else {
+    wrap.innerHTML = `<div class="panel">${listHTML}</div>`;
+  }
+}
+
+function clickProj(id) {
+  selProj = selProj===id ? null : id;
+  renderDetail();
+}
+function closeProj() { selProj=null; renderDetail(); }
+function clearArea() { selArea=null; selProj=null; renderAreas(); renderDetail(); }
+
+renderAreas();
+</script>
+</body>
+</html>
